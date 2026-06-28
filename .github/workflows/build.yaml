@@ -38,10 +38,13 @@ jobs:
     needs: [ test ]
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - platform: windows
-            os: Windows-2022
+          - platform: android
+            os: ubuntu-latest
+          - platform: macos
+            os: macos-15-intel
             arch: amd64
 
     steps:
@@ -59,7 +62,7 @@ jobs:
           submodules: recursive
 
       - name: Setup Android Signing
-        if: startsWith(matrix.platform,'android')
+        if: false
         run: |
           echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
           echo "${{ secrets.SERVICE_JSON }}" | base64 --decode > android/app/google-services.json
@@ -172,6 +175,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload:
+    if: ${{ env.IS_STABLE == 'true' }}
     permissions: write-all
     needs: [ build ]
     runs-on: ubuntu-latest
