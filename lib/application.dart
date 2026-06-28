@@ -60,6 +60,7 @@ class ApplicationState extends ConsumerState<Application> {
 
   void _initLink() {
     linkManager.initAppLinksListen((url) async {
+      await window?.show();
       final res = await globalState.showMessage(
         title: currentAppLocalizations.addProfile,
         message: TextSpan(

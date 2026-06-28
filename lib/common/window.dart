@@ -19,6 +19,7 @@ class Window {
   Future<void> init(int version, WindowProps props) async {
     final acquire = await singleInstanceLock.acquire();
     if (!acquire) {
+      await linkManager.forwardInitialLinkToPrimaryInstance();
       exit(0);
     }
     if (system.isWindows) {
