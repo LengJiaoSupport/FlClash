@@ -7,7 +7,7 @@ import 'package:app_links/app_links.dart';
 import 'print.dart';
 import 'system.dart';
 
-typedef InstallConfigCallBack = void Function(String url);
+typedef InstallConfigCallBack = void Function(String url, String? label);
 
 class LinkManager {
   static LinkManager? _instance;
@@ -36,7 +36,8 @@ class LinkManager {
     if (uri.host != 'install-config') return;
     final url = uri.queryParameters['url'];
     if (url == null) return;
-    _installConfigCallBack?.call(url);
+    final label = uri.queryParameters['name'] ?? uri.queryParameters['label'];
+    _installConfigCallBack?.call(url, label);
   }
 
   Future<void> _startWindowsForwardServer() async {

@@ -59,7 +59,7 @@ class ApplicationState extends ConsumerState<Application> {
   }
 
   void _initLink() {
-    linkManager.initAppLinksListen((url) async {
+    linkManager.initAppLinksListen((url, label) async {
       await window?.show();
       final res = await globalState.showMessage(
         title: currentAppLocalizations.addProfile,
@@ -79,7 +79,10 @@ class ApplicationState extends ConsumerState<Application> {
         ),
       );
       if (res != true) return;
-      ref.read(profilesActionProvider.notifier).addProfileFormURL(url);
+      ref.read(profilesActionProvider.notifier).addProfileFormURL(
+            url,
+            label: label,
+          );
     });
   }
 
