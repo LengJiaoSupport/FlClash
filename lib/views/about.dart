@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -25,28 +23,12 @@ class Contributor {
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
 
-  Future<void> _checkUpdate(BuildContext context) async {
-    final data = await globalState.safeRun<Map<String, dynamic>?>(
-      request.checkForUpdate,
-      title: context.appLocalizations.checkUpdate,
-    );
-    globalState.container
-        .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(data: data, isUser: true);
-  }
-
   List<Widget> _buildMoreSection(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return generateSection(
       separated: false,
       title: appLocalizations.more,
       items: [
-        ListItem(
-          title: Text(appLocalizations.checkUpdate),
-          onTap: () {
-            _checkUpdate(context);
-          },
-        ),
         ListItem(
           title: const Text('Telegram'),
           onTap: () {
@@ -65,7 +47,7 @@ class AboutView extends StatelessWidget {
           title: Text(appLocalizations.core),
           onTap: () {
             globalState.openUrl(
-              'https://github.com/chen08209/Clash.Meta/tree/FlClash',
+              'https://github.com/LengJiaoSupport/Clash.Meta/tree/rc4-support',
             );
           },
           trailing: const Icon(Icons.launch),

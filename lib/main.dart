@@ -15,6 +15,10 @@ Future<void> main() async {
   try {
     if (system.isDesktop) {
       await RustLib.init();
+      await linkManager.startForwardServer();
+      if (await linkManager.forwardIfPossible()) {
+        return;
+      }
     }
     final version = await system.version;
     final container = await globalState.init(version);

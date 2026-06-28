@@ -186,7 +186,7 @@ void main() {
       const props = VpnProps();
       expect(props.enable, true);
       expect(props.systemProxy, true);
-      expect(props.ipv6, false);
+      expect(props.ipv6, true);
       expect(props.allowBypass, true);
       expect(props.dnsHijacking, false);
       expect(props.accessControlProps.enable, false);
@@ -205,13 +205,13 @@ void main() {
       const props = VpnProps(
         enable: false,
         systemProxy: false,
-        ipv6: true,
+        ipv6: false,
         accessControlProps: accessControl,
       );
       final restored = roundTrip(() => props.toJson(), VpnProps.fromJson);
       expect(restored.enable, false);
       expect(restored.systemProxy, false);
-      expect(restored.ipv6, true);
+      expect(restored.ipv6, false);
     });
   });
 

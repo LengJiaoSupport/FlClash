@@ -4,10 +4,11 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/material.dart';
+
+import 'system.dart';
 
 const appName = 'FlClash';
 const appHelperService = 'FlClashHelperService';
@@ -53,10 +54,11 @@ final double kHeaderHeight = system.isDesktop
     : 0;
 const profilesDirectoryName = 'profiles';
 const localhost = '127.0.0.1';
+const appLinkForwardPort = 47891;
 const clashConfigKey = 'clash_config';
 const configKey = 'config';
 const double dialogCommonWidth = 300;
-const repository = 'chen08209/FlClash';
+const repository = 'LengJiaoSupport/FlClash';
 const defaultExternalController = '127.0.0.1:9090';
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;

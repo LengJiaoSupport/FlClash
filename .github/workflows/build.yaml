@@ -39,11 +39,29 @@ jobs:
     needs: [ test ]
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
+          - platform: android
+            os: ubuntu-latest
           - platform: windows
-            os: Windows-2022
+            os: windows-2022
             arch: amd64
+          - platform: linux
+            os: ubuntu-22.04
+            arch: amd64
+          - platform: macos
+            os: macos-15-intel
+            arch: amd64
+          - platform: macos
+            os: macos-latest
+            arch: arm64
+          - platform: windows
+            os: windows-11-arm
+            arch: arm64
+          - platform: linux
+            os: ubuntu-24.04-arm
+            arch: arm64
 
     steps:
       - name: Setup rust
@@ -61,7 +79,7 @@ jobs:
           submodules: recursive
 
       - name: Setup Android Signing
-        if: startsWith(matrix.platform,'android')
+        if: false
         run: |
           echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
           echo "${{ secrets.SERVICE_JSON }}" | base64 --decode > android/app/google-services.json
@@ -173,6 +191,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload:
+    if: ${{ env.IS_STABLE == 'true' }}
     permissions:
       contents: write
     needs: [ build ]
@@ -201,7 +220,7 @@ jobs:
       - name: Generate release.md
         run: |
           tags=($(git tag --merged HEAD --sort=-creatordate))
-          preTag=$(curl -s "https://api.github.com/repos/chen08209/FlClash/releases/latest" | \
+          preTag=$(curl -s "https://api.github.com/repos/LengJiaoSupport/FlClash/releases/latest" | \
           sed -nE 's/.*"tag_name": "([^"]+)".*/\1/p')
           
           [ -z "$preTag" ] && preTag=""
