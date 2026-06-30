@@ -110,7 +110,7 @@ void main() {
       const props = VpnProps();
       expect(props.enable, true);
       expect(props.systemProxy, true);
-      expect(props.ipv6, false);
+      expect(props.ipv6, true);
       expect(props.allowBypass, true);
       expect(props.dnsHijacking, false);
       expect(props.accessControlProps.enable, false);
