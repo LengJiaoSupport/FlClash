@@ -8,6 +8,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/material.dart';
 
+import 'num.dart';
 import 'system.dart';
 
 const appName = 'FlClash';
