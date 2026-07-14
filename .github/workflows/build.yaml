@@ -281,7 +281,7 @@ jobs:
             ./.github/homebrew_cask_template.rb > ./brew/Casks/flclash.rb
 
       - name: Push to Homebrew tap
-        if: ${{ env.IS_STABLE == 'true' }}
+        if: ${{ env.IS_STABLE == 'true' && secrets.HOMEBREW_SSH_DEPLOY_KEY != '' }}
         uses: cpina/github-action-push-to-another-repository@v1.7.2
         env:
           SSH_DEPLOY_KEY: ${{ secrets.HOMEBREW_SSH_DEPLOY_KEY }}
