@@ -191,7 +191,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload:
-    if: ${{ env.IS_STABLE == 'true' }}
+    if: ${{ !contains(github.ref, '-') }}
     permissions:
       contents: write
     needs: [ build ]
