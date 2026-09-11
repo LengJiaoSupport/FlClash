@@ -760,8 +760,8 @@ func blackHoleServer(t *testing.T) net.Addr {
 // of the probe timeout waiting for an HTTP response after the connection opens.
 func TestTestDelayMeasuresDialAfterQueueing(t *testing.T) {
 	const (
-		timeout  = 200 * time.Millisecond
-		queueFor = 150 * time.Millisecond
+		timeout  = 3 * time.Second
+		queueFor = 100 * time.Millisecond
 	)
 
 	addr := blackHoleServer(t)
@@ -790,6 +790,7 @@ func TestTestDelayMeasuresDialAfterQueueing(t *testing.T) {
 
 	time.Sleep(queueFor)
 	<-delayTestSlots
+	defer func() { delayTestSlots <- struct{}{} }()
 
 	select {
 	case delay := <-done:
@@ -807,20 +808,16 @@ func TestTestDelayMeasuresDialAfterQueueing(t *testing.T) {
 				queueFor,
 			)
 		}
-		if elapsed >= queueFor+timeout {
+		if elapsed >= queueFor+time.Second {
 			t.Errorf(
 				"handleTestDelay returned after %v, want less than %v for a dial-only probe",
 				elapsed,
-				queueFor+timeout,
+				queueFor+time.Second,
 			)
 		}
-	case <-time.After(5 * time.Second):
+	case <-time.After(time.Second):
 		t.Fatal("handleTestDelay never returned")
 	}
-
-	// handleTestDelay released the slot it was handed; put it back so the
-	// cleanup above drains what it put in.
-	delayTestSlots <- struct{}{}
 }
 
 func TestTestDelayStopsQueueingOnceTheTimeoutIsSpent(t *testing.T) {
