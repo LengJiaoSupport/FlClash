@@ -26,27 +26,12 @@ class Contributor {
 class AboutView extends ConsumerWidget {
   const AboutView({super.key});
 
-  Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
-    final commonAction = ref.read(commonActionProvider.notifier);
-    final data = await globalState.safeRun<Map<String, dynamic>?>(
-      request.checkForUpdate,
-      title: context.appLocalizations.checkUpdate,
-    );
-    unawaited(commonAction.checkUpdateResultHandle(data: data, isUser: true));
-  }
-
-  List<Widget> _buildMoreSection(BuildContext context, WidgetRef ref) {
+  List<Widget> _buildMoreSection(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return generateSection(
       separated: false,
       title: appLocalizations.more,
       items: [
-        ListItem(
-          title: Text(appLocalizations.checkUpdate),
-          onTap: () {
-            _checkUpdate(context, ref);
-          },
-        ),
         ListItem(
           title: const Text('Telegram'),
           onTap: () {
@@ -65,7 +50,7 @@ class AboutView extends ConsumerWidget {
           title: Text(appLocalizations.core),
           onTap: () {
             dialogs.openUrl(
-              'https://github.com/chen08209/Clash.Meta/tree/FlClash',
+              'https://github.com/LengJiaoSupport/Clash.Meta/tree/rc4-v0.8.97',
             );
           },
           trailing: const Icon(Icons.launch),
@@ -167,7 +152,7 @@ class AboutView extends ConsumerWidget {
       ),
       const SizedBox(height: 12),
       ..._buildContributorsSection(appLocalizations),
-      ..._buildMoreSection(context, ref),
+      ..._buildMoreSection(context),
     ];
     return BaseScaffold(
       title: appLocalizations.about,

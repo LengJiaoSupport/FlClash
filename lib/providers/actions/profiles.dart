@@ -116,7 +116,7 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<void> addProfileFormURL(String url) async {
+  Future<void> addProfileFormURL(String url, {String? label}) async {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
@@ -125,6 +125,7 @@ class ProfilesAction extends _$ProfilesAction {
       tag: LoadingTag.profiles,
       () async {
         return Profile.normal(
+          label: label,
           url: url,
         ).update(validate: (path) => _core.validateConfig(path));
       },

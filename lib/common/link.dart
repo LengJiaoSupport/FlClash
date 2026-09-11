@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'print.dart';
 import 'protocol.dart';
 
-typedef InstallConfigCallBack = void Function(String url);
+typedef InstallConfigCallBack = void Function(String url, String? label);
 
 class LinkManager {
   static LinkManager? _instance;
@@ -30,7 +30,7 @@ class LinkManager {
   }
 
   Future<void> initAppLinksListen(
-    Function(String url) installConfigCallBack,
+    InstallConfigCallBack installConfigCallBack,
   ) async {
     commonPrint.log('initAppLinksListen');
     destroy();
@@ -44,13 +44,17 @@ class LinkManager {
     }
   }
 
-  void _handle(Uri uri, Function(String url) installConfigCallBack) {
+  void _handle(Uri uri, InstallConfigCallBack installConfigCallBack) {
     commonPrint.log('onAppLink: $uri');
     if (uri.host == 'install-config') {
       final parameters = uri.queryParameters;
       final url = parameters['url'];
       if (url != null) {
-        installConfigCallBack(url);
+        final name = parameters['name'];
+        final label = name?.trim().isNotEmpty == true
+            ? name
+            : parameters['label'];
+        installConfigCallBack(url, label);
       }
     }
   }

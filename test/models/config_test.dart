@@ -104,7 +104,7 @@ void main() {
       expect(restored.openLogs, false);
       expect(restored.closeConnections, true);
       expect(restored.isAnimateToPage, true);
-      expect(restored.autoCheckUpdate, true);
+      expect(restored.autoCheckUpdate, false);
       expect(restored.showLabel, false);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
@@ -186,7 +186,7 @@ void main() {
       const props = VpnProps();
       expect(props.enable, true);
       expect(props.systemProxy, true);
-      expect(props.ipv6, false);
+      expect(props.ipv6, true);
       expect(props.allowBypass, true);
       expect(props.dnsHijacking, false);
       expect(props.accessControlProps.enable, false);
@@ -249,6 +249,8 @@ void main() {
       expect(config.geodataLoader, GeodataLoader.memconservative);
       expect(config.interfaceNameMode, InterfaceNameMode.clear);
       expect(config.interfaceName, '');
+      expect(config.ipv6, true);
+      expect(config.dns.ipv6, true);
     });
 
     test('custom values survive round-trip', () {

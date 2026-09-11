@@ -1,6 +1,7 @@
 name: build
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - '**'
@@ -12,7 +13,7 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
 
 env:
-  IS_STABLE: ${{ !contains(github.ref, '-') }}
+  IS_STABLE: ${{ startsWith(github.ref, 'refs/tags/v') }}
   FLUTTER_VERSION: '3.47.1'
   GO_VERSION: '1.26.4'
   NDK_VERSION: r28c
@@ -54,7 +55,7 @@ jobs:
           yq -i '.hooks.user_defines.setup.build_assets = false | .hooks.user_defines.rust_api.build_assets = false' pubspec.yaml
 
       - name: Verify changelog
-        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && !contains(github.ref, '-custom')
         run: dart run tool/changelog.dart verify
 
       - name: Run tests
@@ -235,6 +236,7 @@ jobs:
     needs: [ dart, plugins, go, android, rust, windows-helper-test ]
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - platform: android
@@ -274,7 +276,7 @@ jobs:
           submodules: recursive
 
       - name: Setup Android Signing
-        if: startsWith(matrix.platform,'android')
+        if: false
         run: |
           echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
           echo "${{ secrets.SERVICE_JSON }}" | base64 --decode > android/app/google-services.json
@@ -351,14 +353,6 @@ jobs:
       contents: write
     needs: [ build ]
     runs-on: ubuntu-latest
-    services:
-      telegram-bot-api:
-        image: aiogram/telegram-bot-api:latest
-        env:
-          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-        ports:
-          - 8081:8081
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -393,23 +387,27 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           target=()
-          if [[ "$IS_STABLE" == 'true' ]]; then
+          if [[ "$TAG" == *-custom ]]; then
+            cat > release.md <<'EOF'
+          ## FlClash custom build
+
+          - Based on official FlClash v0.8.97
+          - Adds Shadowsocks/SSR RC4 cipher support
+          - Uses proxy DialContext time for delay tests
+          - Enables IPv6 by default
+          - Fixes one-click profile names and Windows protocol activation
+          - Disables update checks
+          EOF
+            cp release.md telegram.md
+          elif [[ "$IS_STABLE" == 'true' ]]; then
             target=(--tag "$TAG")
+            dart run tool/changelog.dart render release "${target[@]}" --out release.md
+            dart run tool/changelog.dart render telegram "${target[@]}" --out telegram.md
           else
             dart run tool/changelog.dart build --unreleased
+            dart run tool/changelog.dart render release --out release.md
+            dart run tool/changelog.dart render telegram --out telegram.md
           fi
-          dart run tool/changelog.dart render release "${target[@]}" --out release.md
-          dart run tool/changelog.dart render telegram "${target[@]}" --out telegram.md
-
-      - name: Push to telegram
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TAG: ${{ github.ref_name }}
-          RUN_ID: ${{ github.run_id }}
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-          python release_telegram.py
 
       - name: Patch release.md
         run: |
@@ -444,16 +442,16 @@ jobs:
             ./.github/homebrew_cask_template.rb > ./brew/Casks/flclash.rb
 
       - name: Push to Homebrew tap
-        if: ${{ env.IS_STABLE == 'true' }}
+        if: ${{ env.IS_STABLE == 'true' && secrets.HOMEBREW_SSH_DEPLOY_KEY != '' }}
         uses: cpina/github-action-push-to-another-repository@v1.7.2
         env:
           SSH_DEPLOY_KEY: ${{ secrets.HOMEBREW_SSH_DEPLOY_KEY }}
         with:
           source-directory: ./brew/
-          destination-github-username: chen08209
+          destination-github-username: LengJiaoSupport
           destination-repository-name: homebrew-tap
-          user-name: 'chen08029'
-          user-email: 'chen08209@gmail.com'
+          user-name: 'LengJiaoSupport'
+          user-email: 'lengjiao8@gmail.com'
           target-branch: main
           commit-message: Update Homebrew cask from ${{ github.ref_name }}
           target-directory: /
@@ -466,16 +464,16 @@ jobs:
           echo "Files copied successfully"
 
       - name: Push to fdroid repo
-        if: ${{ env.IS_STABLE == 'true' }}
+        if: ${{ env.IS_STABLE == 'true' && secrets.SSH_DEPLOY_KEY != '' }}
         uses: cpina/github-action-push-to-another-repository@v1.7.2
         env:
           SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:
           source-directory: ./tmp/
-          destination-github-username: chen08209
+          destination-github-username: LengJiaoSupport
           destination-repository-name: FlClash-fdroid-repo
-          user-name: 'chen08029'
-          user-email: 'chen08209@gmail.com'
+          user-name: 'LengJiaoSupport'
+          user-email: 'lengjiao8@gmail.com'
           target-branch: main
           commit-message: Update from ${{ github.ref_name }}
           target-directory: /tmp/
