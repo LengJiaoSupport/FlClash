@@ -330,6 +330,32 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.build-ndk.outputs.ndk-path }}
         run: dart setup.dart ${{ matrix.platform }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
 
+      - name: Mark custom artifact filenames
+        if: contains(github.ref_name, '-custom')
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $versionLine = Get-Content pubspec.yaml | Where-Object { $_ -match '^version:' } | Select-Object -First 1
+          if ($versionLine -notmatch '^version:\s*([0-9]+\.[0-9]+\.[0-9]+)') {
+            throw "Could not read the package version from pubspec.yaml"
+          }
+          $baseVersion = $Matches[1]
+          $releaseVersion = $env:RELEASE_TAG -replace '^v', ''
+          $prefix = "FlClash-$baseVersion"
+          $replacement = "FlClash-$releaseVersion"
+          $renamed = 0
+          Get-ChildItem -LiteralPath ./dist -File | ForEach-Object {
+            if ($_.Name.StartsWith($prefix)) {
+              $newName = $replacement + $_.Name.Substring($prefix.Length)
+              Rename-Item -LiteralPath $_.FullName -NewName $newName
+              $renamed++
+            }
+          }
+          if ($renamed -eq 0) {
+            throw "No FlClash artifacts were found to mark as custom"
+          }
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
