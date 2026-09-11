@@ -12,7 +12,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/inbound"
+	"github.com/metacubex/mihomo/adapter/outbound"
 	"github.com/metacubex/mihomo/component/updater"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
@@ -756,6 +758,26 @@ func blackHoleServer(t *testing.T) net.Addr {
 	return listener.Addr()
 }
 
+type loopbackDialAdapter struct {
+	*outbound.Direct
+}
+
+func (a *loopbackDialAdapter) DialContext(
+	ctx context.Context,
+	metadata *constant.Metadata,
+) (constant.Conn, error) {
+	conn, err := (&net.Dialer{}).DialContext(ctx, "tcp", metadata.RemoteAddress())
+	if err != nil {
+		return nil, err
+	}
+	return outbound.NewConn(conn, a), nil
+}
+
+func loopbackTestProxy(name string) constant.Proxy {
+	direct := outbound.NewDirectWithOption(outbound.DirectOption{Name: name})
+	return adapter.NewProxy(&loopbackDialAdapter{Direct: direct})
+}
+
 // A dial-only test still waits for its queue slot, but does not spend the rest
 // of the probe timeout waiting for an HTTP response after the connection opens.
 func TestTestDelayMeasuresDialAfterQueueing(t *testing.T) {
@@ -775,7 +797,7 @@ func TestTestDelayMeasuresDialAfterQueueing(t *testing.T) {
 		}
 	})
 
-	tunnel.UpdateProxies(map[string]constant.Proxy{"queued": namedProxy("queued")}, nil)
+	tunnel.UpdateProxies(map[string]constant.Proxy{"queued": loopbackTestProxy("queued")}, nil)
 	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
 
 	done := make(chan *Delay, 1)
