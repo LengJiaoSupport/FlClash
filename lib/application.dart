@@ -106,7 +106,7 @@ class ApplicationState extends ConsumerState<Application> {
   }
 
   void _initLink() {
-    linkManager.initAppLinksListen((url) async {
+    linkManager.initAppLinksListen((url, label) async {
       unawaited(window?.show());
       final message = currentAppLocalizations.createProfileFromUrlTip(url);
       final parts = message.split(url);
@@ -128,9 +128,14 @@ class ApplicationState extends ConsumerState<Application> {
         ),
       );
       if (res != true) return;
+      // App-link delivery reaches this callback through the platform runner.
+      // coverage:ignore-start
       unawaited(
-        ref.read(profilesActionProvider.notifier).addProfileFormURL(url),
+        ref
+            .read(profilesActionProvider.notifier)
+            .addProfileFormURL(url, label: label),
       );
+      // coverage:ignore-end
     });
   }
 

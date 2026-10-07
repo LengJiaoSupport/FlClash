@@ -12,7 +12,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/inbound"
+	"github.com/metacubex/mihomo/adapter/outbound"
 	"github.com/metacubex/mihomo/component/updater"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
@@ -799,9 +801,8 @@ func TestTestDelayQueuesWhenTheTimeoutIsUnset(t *testing.T) {
 	}
 }
 
-// blackHoleServer accepts connections and then says nothing, so a probe against
-// it connects and waits out its deadline rather than failing fast the way a
-// refused port would.
+// blackHoleServer accepts connections and then says nothing. A dial-only delay
+// test should finish as soon as the TCP connection is established.
 func blackHoleServer(t *testing.T) net.Addr {
 	t.Helper()
 
@@ -836,15 +837,32 @@ func blackHoleServer(t *testing.T) net.Addr {
 	return listener.Addr()
 }
 
-// Queueing for a slot and probing the node must not share one deadline. They
-// used to, so a node that waited out most of its timeout behind a saturated
-// semaphore had only the remainder to connect in and reported Timeout while it
-// was perfectly healthy - which is what a bulk test of a large subscription
-// does to everything at the back of the queue.
-func TestTestDelayDoesNotSpendTheProbeBudgetQueueing(t *testing.T) {
+type loopbackDialAdapter struct {
+	*outbound.Direct
+}
+
+func (a *loopbackDialAdapter) DialContext(
+	ctx context.Context,
+	metadata *constant.Metadata,
+) (constant.Conn, error) {
+	conn, err := (&net.Dialer{}).DialContext(ctx, "tcp", metadata.RemoteAddress())
+	if err != nil {
+		return nil, err
+	}
+	return outbound.NewConn(conn, a), nil
+}
+
+func loopbackTestProxy(name string) constant.Proxy {
+	direct := outbound.NewDirectWithOption(outbound.DirectOption{Name: name})
+	return adapter.NewProxy(&loopbackDialAdapter{Direct: direct})
+}
+
+// A dial-only test still waits for its queue slot, but does not spend the rest
+// of the probe timeout waiting for an HTTP response after the connection opens.
+func TestTestDelayMeasuresDialAfterQueueing(t *testing.T) {
 	const (
-		timeout  = 200 * time.Millisecond
-		queueFor = 150 * time.Millisecond
+		timeout  = 3 * time.Second
+		queueFor = 100 * time.Millisecond
 	)
 
 	addr := blackHoleServer(t)
@@ -858,7 +876,7 @@ func TestTestDelayDoesNotSpendTheProbeBudgetQueueing(t *testing.T) {
 		}
 	})
 
-	tunnel.UpdateProxies(map[string]constant.Proxy{"queued": namedProxy("queued")}, nil)
+	tunnel.UpdateProxies(map[string]constant.Proxy{"queued": loopbackTestProxy("queued")}, nil)
 	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
 
 	done := make(chan *Delay, 1)
@@ -873,6 +891,7 @@ func TestTestDelayDoesNotSpendTheProbeBudgetQueueing(t *testing.T) {
 
 	time.Sleep(queueFor)
 	<-delayTestSlots
+	defer func() { delayTestSlots <- struct{}{} }()
 
 	select {
 	case delay := <-done:
@@ -880,20 +899,26 @@ func TestTestDelayDoesNotSpendTheProbeBudgetQueueing(t *testing.T) {
 		if delay == nil {
 			t.Fatal("handleTestDelay gave up queueing even though a slot came free")
 		}
-		if elapsed < queueFor+timeout {
+		if delay.Value < 0 {
+			t.Fatalf("handleTestDelay returned failed delay: %+v", delay)
+		}
+		if elapsed < queueFor {
 			t.Errorf(
-				"handleTestDelay returned after %v, want at least %v: the probe inherited the deadline the wait had already spent",
+				"handleTestDelay returned after %v, before its %v queue wait finished",
 				elapsed,
-				queueFor+timeout,
+				queueFor,
 			)
 		}
-	case <-time.After(5 * time.Second):
+		if elapsed >= queueFor+time.Second {
+			t.Errorf(
+				"handleTestDelay returned after %v, want less than %v for a dial-only probe",
+				elapsed,
+				queueFor+time.Second,
+			)
+		}
+	case <-time.After(time.Second):
 		t.Fatal("handleTestDelay never returned")
 	}
-
-	// handleTestDelay released the slot it was handed; put it back so the
-	// cleanup above drains what it put in.
-	delayTestSlots <- struct{}{}
 }
 
 func TestTestDelayStopsQueueingOnceTheTimeoutIsSpent(t *testing.T) {

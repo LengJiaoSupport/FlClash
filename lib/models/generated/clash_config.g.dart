@@ -251,7 +251,7 @@ _Dns _$DnsFromJson(Map<String, dynamic> json) => _Dns(
   useHosts: json['use-hosts'] as bool? ?? true,
   useSystemHosts: json['use-system-hosts'] as bool? ?? true,
   respectRules: json['respect-rules'] as bool? ?? false,
-  ipv6: json['ipv6'] as bool? ?? false,
+  ipv6: json['ipv6'] as bool? ?? true,
   ipv6Timeout: (json['ipv6-timeout'] as num?)?.toInt() ?? 100,
   cacheAlgorithm:
       $enumDecodeNullable(
@@ -503,7 +503,7 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
       logLevel:
           $enumDecodeNullable(_$LogLevelEnumMap, json['log-level']) ??
           LogLevel.error,
-      ipv6: json['ipv6'] as bool? ?? false,
+      ipv6: json['ipv6'] as bool? ?? true,
       findProcessMode:
           $enumDecodeNullable(
             _$FindProcessModeEnumMap,

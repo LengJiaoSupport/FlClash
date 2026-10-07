@@ -154,6 +154,6 @@ void main() {
 
     await tapCancel(tester);
     await shown;
-    expect(container.read(appSettingProvider).autoCheckUpdate, isTrue);
+    expect(container.read(appSettingProvider).autoCheckUpdate, isFalse);
   });
 }

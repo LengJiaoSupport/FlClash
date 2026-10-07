@@ -504,7 +504,7 @@ abstract class Dns with _$Dns {
     @Default(true) @JsonKey(name: 'use-hosts') bool useHosts,
     @Default(true) @JsonKey(name: 'use-system-hosts') bool useSystemHosts,
     @Default(false) @JsonKey(name: 'respect-rules') bool respectRules,
-    @Default(false) bool ipv6,
+    @Default(true) bool ipv6,
     @Default(100) @JsonKey(name: 'ipv6-timeout') int ipv6Timeout,
     @Default(DnsCacheAlgorithm.lru)
     @JsonKey(name: 'cache-algorithm')
@@ -1071,7 +1071,7 @@ abstract class PatchClashConfig with _$PatchClashConfig {
     @Default(Mode.rule) Mode mode,
     @Default(false) @JsonKey(name: 'allow-lan') bool allowLan,
     @Default(LogLevel.error) @JsonKey(name: 'log-level') LogLevel logLevel,
-    @Default(false) bool ipv6,
+    @Default(true) bool ipv6,
     @Default(FindProcessMode.off)
     @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off)
     FindProcessMode findProcessMode,
