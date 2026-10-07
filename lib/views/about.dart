@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
@@ -108,9 +111,7 @@ class AboutView extends ConsumerWidget {
 class _AboutHero extends StatelessWidget {
   final VoidCallback onEnterDeveloperMode;
 
-  const _AboutHero({
-    required this.onEnterDeveloperMode,
-  });
+  const _AboutHero({required this.onEnterDeveloperMode});
 
   static const _logoSize = 96.0;
   static const _logoInset = 14.0;
