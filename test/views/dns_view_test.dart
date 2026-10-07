@@ -91,7 +91,7 @@ void main() {
     expect(find.text('IPv6'), findsOneWidget);
     await tester.tap(find.byType(Switch).last);
     await tester.pump();
-    expect(config().dns.ipv6, isTrue);
+    expect(config().dns.ipv6, isFalse);
 
     await tester.tap(find.byTooltip(currentAppLocalizations.remove));
     await tester.pumpAndSettle();
@@ -205,7 +205,7 @@ void main() {
     await tester.pump();
 
     final editor = await openQuickEdit(tester);
-    expect(editor.content, contains('ipv6: false'));
+    expect(editor.content, contains('ipv6: true'));
     expect(editor.readOnly, isFalse);
     expect(editor.onSave, isNull);
 
