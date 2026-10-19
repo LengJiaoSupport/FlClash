@@ -37,7 +37,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
       ) ??
       TabAnimation.slide,
   floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
-  autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
+  autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
   sidebarExpanded:
       _readSidebarExpanded(json, 'sidebarExpanded') as bool? ?? true,
   acceptedDisclaimerVersion:
@@ -49,7 +49,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
       $enumDecodeNullable(_$RestoreStrategyEnumMap, json['restoreStrategy']) ??
       RestoreStrategy.compatible,
   showTrayTitle: json['showTrayTitle'] as bool? ?? true,
-  checkCertificate: json['checkCertificate'] as bool? ?? true,
+  checkCertificate: json['checkCertificate'] as bool? ?? false,
   userAgents:
       (_readUserAgents(json, 'userAgents') as List<dynamic>?)
           ?.map((e) => e as String)
@@ -217,7 +217,7 @@ Map<String, dynamic> _$WindowPropsToJson(_WindowProps instance) =>
 _VpnProps _$VpnPropsFromJson(Map<String, dynamic> json) => _VpnProps(
   enable: json['enable'] as bool? ?? true,
   systemProxy: json['systemProxy'] as bool? ?? true,
-  ipv6: json['ipv6'] as bool? ?? false,
+  ipv6: json['ipv6'] as bool? ?? true,
   allowBypass: json['allowBypass'] as bool? ?? true,
   dnsHijacking: json['dnsHijacking'] as bool? ?? false,
   accessControlProps: json['accessControlProps'] == null

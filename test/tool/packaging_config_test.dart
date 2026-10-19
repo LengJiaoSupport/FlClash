@@ -4,6 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:yaml/yaml.dart';
 
 void main() {
+  test('Windows installer registers every runtime URL protocol', () {
+    final script = File(
+      'windows/packaging/exe/inno_setup.iss',
+    ).readAsStringSync();
+
+    for (final scheme in ['clash', 'clashmeta', 'flclash']) {
+      expect(script, contains('Software\\Classes\\$scheme'));
+    }
+    expect(script, contains('""%1""'));
+    expect(script, contains('{{EXECUTABLE_NAME}}'));
+  });
+
   group('Linux packaging teardown', () {
     for (final format in ['deb', 'rpm']) {
       test('$format removes the Helper unit only on a real uninstall', () {

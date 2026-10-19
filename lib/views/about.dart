@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -25,20 +23,6 @@ class AboutView extends ConsumerWidget {
     Contributor(avatar: 'assets/images/avatar/arue.jpg', name: 'Arue'),
   ];
 
-  Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
-    if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
-    final commonAction = ref.read(commonActionProvider.notifier);
-    final result = await globalState.loadingRun(
-      () async => (release: await request.checkForUpdate()),
-      title: context.appLocalizations.checkUpdate,
-      tag: LoadingTag.checkUpdate,
-    );
-    if (result == null) return;
-    unawaited(
-      commonAction.checkUpdateResultHandle(data: result.release, isUser: true),
-    );
-  }
-
   Widget _buildLinkItem({
     required Glyph glyph,
     required String title,
@@ -59,9 +43,7 @@ class AboutView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final isLoading = ref.watch(loadingProvider(LoadingTag.checkUpdate));
     return CommonScaffold(
-      isLoading: isLoading,
       title: appLocalizations.about,
       body: ListView(
         padding: const EdgeInsets.symmetric(
@@ -69,10 +51,6 @@ class AboutView extends ConsumerWidget {
         ).copyWith(top: context.contentTopPadding, bottom: 32),
         children: [
           _AboutHero(
-            isCheckingUpdate: isLoading,
-            onCheckUpdate: () {
-              _checkUpdate(context, ref);
-            },
             onEnterDeveloperMode: () {
               ref
                   .read(appSettingProvider.notifier)
@@ -96,8 +74,9 @@ class AboutView extends ConsumerWidget {
               _buildLinkItem(
                 glyph: AppGlyphs.cpu,
                 title: appLocalizations.core,
-                url: 'https://github.com/chen08209/Clash.Meta/tree/FlClash',
-                label: 'github.com/chen08209/Clash.Meta',
+                url:
+                    'https://github.com/LengJiaoSupport/Clash.Meta/tree/rc4-v0.9.1',
+                label: 'github.com/LengJiaoSupport/Clash.Meta',
               ),
               _buildLinkItem(
                 glyph: AppGlyphs.send,
@@ -127,15 +106,9 @@ class AboutView extends ConsumerWidget {
 }
 
 class _AboutHero extends StatelessWidget {
-  final bool isCheckingUpdate;
-  final VoidCallback onCheckUpdate;
   final VoidCallback onEnterDeveloperMode;
 
-  const _AboutHero({
-    required this.isCheckingUpdate,
-    required this.onCheckUpdate,
-    required this.onEnterDeveloperMode,
-  });
+  const _AboutHero({required this.onEnterDeveloperMode});
 
   static const _logoSize = 96.0;
   static const _logoInset = 14.0;
@@ -198,13 +171,6 @@ class _AboutHero extends StatelessWidget {
                   .of(context)
                   .copyWith(color: colorScheme.onSurfaceVariant, height: 1.5),
             ),
-          ),
-          const SizedBox(height: 20),
-          TonalButton(
-            size: TonalButtonSize.bar,
-            glyph: AppGlyphs.sync,
-            label: appLocalizations.checkUpdate,
-            onPressed: isCheckingUpdate ? null : onCheckUpdate,
           ),
         ],
       ),

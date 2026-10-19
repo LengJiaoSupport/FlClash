@@ -7,6 +7,8 @@ import 'print.dart';
 import 'protocol.dart';
 import 'string.dart';
 
+typedef InstallConfigCallBack = void Function(String url, String? label);
+
 String? profileUrlFromQrCodes(Iterable<String?> values) {
   for (final value in values) {
     final text = value?.trim();
@@ -36,6 +38,15 @@ String? _installConfigUrl(Uri uri) {
   return url == null || url.isEmpty ? null : url;
 }
 
+String? _installConfigLabel(Uri uri) {
+  final name = uri.queryParameters['name']?.trim();
+  if (name != null && name.isNotEmpty) {
+    return name;
+  }
+  final label = uri.queryParameters['label']?.trim();
+  return label == null || label.isEmpty ? null : label;
+}
+
 class LinkManager {
   static LinkManager? _instance;
   StreamSubscription? subscription;
@@ -58,7 +69,7 @@ class LinkManager {
   }
 
   Future<void> initAppLinksListen(
-    Function(String url) installConfigCallBack,
+    InstallConfigCallBack installConfigCallBack,
   ) async {
     destroy();
     subscription = uriLinkStream().listen((uri) {
@@ -71,11 +82,11 @@ class LinkManager {
     }
   }
 
-  void _handle(Uri uri, Function(String url) installConfigCallBack) {
+  void _handle(Uri uri, InstallConfigCallBack installConfigCallBack) {
     commonPrint.log('onAppLink: $uri');
     final url = _installConfigUrl(uri);
     if (url != null) {
-      installConfigCallBack(url);
+      installConfigCallBack(url, _installConfigLabel(uri));
     }
   }
 

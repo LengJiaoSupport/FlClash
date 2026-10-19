@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   late StreamController<Uri> links;
-  late List<String> received;
+  late List<(String, String?)> received;
 
   setUp(() {
     links = StreamController<Uri>.broadcast();
@@ -19,7 +19,9 @@ void main() {
   });
 
   Future<void> listen() async {
-    await linkManager.initAppLinksListen(received.add);
+    await linkManager.initAppLinksListen(
+      (url, label) => received.add((url, label)),
+    );
   }
 
   Future<void> emit(String uri) async {
@@ -36,7 +38,43 @@ void main() {
 
     await emit('flclash://install-config?url=https://example.com/a.yaml');
 
-    expect(received, ['https://example.com/a.yaml']);
+    expect(received, [('https://example.com/a.yaml', null)]);
+  });
+
+  test('name sets the imported profile label', () async {
+    await listen();
+
+    await emit(
+      'flclash://install-config?name=%E6%A3%B1%E8%A7%92&url=https%3A%2F%2Fexample.com%2Fa.yaml',
+    );
+
+    expect(received, [('https://example.com/a.yaml', '棱角')]);
+  });
+
+  test('label is accepted as a fallback alias', () async {
+    await listen();
+
+    await emit(
+      'flclash://install-config?label=Backup&url=https%3A%2F%2Fexample.com%2Fa.yaml',
+    );
+
+    expect(received, [('https://example.com/a.yaml', 'Backup')]);
+  });
+
+  test('name takes precedence and blank labels are ignored', () async {
+    await listen();
+
+    await emit(
+      'flclash://install-config?name=Primary&label=Backup&url=https%3A%2F%2Fexample.com%2Fa.yaml',
+    );
+    await emit(
+      'flclash://install-config?name=%20&label=%20&url=https%3A%2F%2Fexample.com%2Fb.yaml',
+    );
+
+    expect(received, [
+      ('https://example.com/a.yaml', 'Primary'),
+      ('https://example.com/b.yaml', null),
+    ]);
   });
 
   test('an install-config link without a url is ignored', () async {
@@ -74,7 +112,7 @@ void main() {
 
     await emit('flclash://install-config?url=https://example.com/a.yaml');
 
-    expect(received, ['https://example.com/a.yaml']);
+    expect(received, [('https://example.com/a.yaml', null)]);
   });
 
   test(
@@ -89,11 +127,11 @@ void main() {
 
       await listen();
 
-      expect(received, ['https://example.com/a.yaml']);
+      expect(received, [('https://example.com/a.yaml', null)]);
 
       await listen();
 
-      expect(received, ['https://example.com/a.yaml']);
+      expect(received, [('https://example.com/a.yaml', null)]);
     },
   );
 
