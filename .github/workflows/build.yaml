@@ -498,7 +498,7 @@ jobs:
           IS_STABLE: ${{ env.IS_STABLE }}
           TAG: ${{ github.ref_name }}
         run: |
-          if [[ "$TAG" == *-custom ]]; then
+          if [[ "$TAG" == *-custom* ]]; then
             cat > release.md <<'EOF'
           ## FlClash v0.9.1 custom build
 
@@ -509,6 +509,7 @@ jobs:
           - Enables IPv6 by default
           - Disables TLS certificate validation by default for subscriptions
           - Disables application update checks
+          - Removes the disclaimer consent prompt and tools entry
           EOF
           elif [[ "$IS_STABLE" == 'true' ]]; then
             target=()
