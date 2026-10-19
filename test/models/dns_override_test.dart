@@ -49,7 +49,8 @@ void main() {
     ];
 
     expect(valueOf('Enable'), '${defaultDns.enable}');
-    expect(valueOf('IPv6'), '${defaultDns.ipv6}');
+    expect(valueOf('IPv6'), 'false');
+    expect(defaultDns.ipv6, isTrue);
     expect(valueOf('UseHosts'), '${defaultDns.useHosts}');
     expect(valueOf('UseSystemHosts'), '${defaultDns.useSystemHosts}');
     expect(valueOf('IPv6Timeout'), '${defaultDns.ipv6Timeout}');

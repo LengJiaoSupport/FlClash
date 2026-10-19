@@ -562,7 +562,7 @@ void main() {
         findProcessMode: FindProcessMode.always,
         mode: Mode.global,
         logLevel: LogLevel.debug,
-        ipv6: true,
+        ipv6: false,
         tcpConcurrent: false,
         externalController: ExternalControllerStatus.open,
         secret: 'secret',
@@ -593,7 +593,7 @@ void main() {
         defaultClashConfig.copyWith(routingMark: 6666),
         defaultClashConfig.copyWith(globalUa: 'ua'),
         defaultClashConfig.copyWith(hosts: const {'a.test': '1.1.1.1'}),
-        defaultClashConfig.copyWith(dns: defaultDns.copyWith(ipv6: true)),
+        defaultClashConfig.copyWith(dns: defaultDns.copyWith(ipv6: false)),
         defaultClashConfig.copyWith(tunOverrideKeys: {TunOverrideKey.gso}),
       ];
 
