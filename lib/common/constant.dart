@@ -102,7 +102,7 @@ const maxConcurrentImports = 4;
 const maxConcurrentIconLoads = 8;
 
 const renderThrottleDuration = Duration(milliseconds: 300);
-const defaultUpdateDuration = Duration(days: 1);
+const defaultUpdateDuration = Duration(days: 2);
 const MMDB = 'GEOIP.metadb';
 const ASN = 'ASN.mmdb';
 const GEOIP = 'GEOIP.dat';
@@ -129,7 +129,7 @@ const systemDnsRecordKey = 'system_dns_record';
 const bootRecordKey = 'boot_record';
 const appliedConfigMd5Key = 'applied_config_md5';
 const defaultSystemDnsFallback = '223.5.5.5';
-const repository = 'chen08209/FlClash';
+const repository = 'LengJiaoSupport/FlClash';
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;
 const defaultTestUrl = 'https://www.gstatic.com/generate_204';

@@ -144,10 +144,11 @@ void main() {
       expect(restored.openLogs, false);
       expect(restored.closeConnections, true);
       expect(restored.tabAnimation, TabAnimation.fade);
-      expect(restored.autoCheckUpdate, true);
+      expect(restored.autoCheckUpdate, false);
       expect(restored.sidebarExpanded, true);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
+      expect(restored.checkCertificate, false);
       expect(restored.userAgents, defaultUserAgents);
       expect(restored.filters, defaultFilters);
     });
@@ -392,7 +393,7 @@ void main() {
       const props = VpnProps();
       expect(props.enable, true);
       expect(props.systemProxy, true);
-      expect(props.ipv6, false);
+      expect(props.ipv6, true);
       expect(props.allowBypass, true);
       expect(props.dnsHijacking, false);
       expect(props.accessControlProps.enable, false);
@@ -715,7 +716,7 @@ void main() {
         GeneralOverrideKey.geodataLoader,
       });
       expect(config.tcpConcurrent, false);
-      expect(config.ipv6, false);
+      expect(config.ipv6, true);
       expect(config.unifiedDelay, true);
     });
 
@@ -769,7 +770,7 @@ void main() {
         findProcessMode: FindProcessMode.always,
         mode: Mode.global,
         logLevel: LogLevel.debug,
-        ipv6: true,
+        ipv6: false,
         tcpConcurrent: false,
         externalController: ExternalControllerStatus.open,
         secret: 'secret',
@@ -801,7 +802,7 @@ void main() {
         defaultClashConfig.copyWith(routingMark: 6666),
         defaultClashConfig.copyWith(globalUa: 'ua'),
         defaultClashConfig.copyWith(hosts: const {'a.test': '1.1.1.1'}),
-        defaultClashConfig.copyWith(dns: defaultDns.copyWith(ipv6: true)),
+        defaultClashConfig.copyWith(dns: defaultDns.copyWith(ipv6: false)),
         defaultClashConfig.copyWith(tunOverrideKeys: {TunOverrideKey.gso}),
         defaultClashConfig.copyWith(geodataLoader: GeodataLoader.standard),
       ];
@@ -1174,7 +1175,7 @@ void main() {
       expect(config.currentProfileId, isNull);
       expect(config.appSettingProps.locale, isNull);
       expect(config.appSettingProps.acceptedDisclaimerVersion, 3);
-      expect(config.vpnProps.ipv6, false);
+      expect(config.vpnProps.ipv6, true);
       expect(config.vpnProps.accessControlProps.enable, true);
       expect(
         config.vpnProps.accessControlProps.mode,
