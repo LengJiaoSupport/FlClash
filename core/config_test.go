@@ -1032,11 +1032,11 @@ func TestTestDelayMeasuresDialAfterQueueing(t *testing.T) {
 	}
 }
 
-func TestTestDelayKeepsToTheTimeoutTheGroupNames(t *testing.T) {
+func TestTestDelayUsesGroupNamesWithADialOnlyProbe(t *testing.T) {
 	const named = 100 * time.Millisecond
 	testURL := "http://" + blackHoleServer(t).String()
 
-	node := namedProxy("node")
+	node := loopbackTestProxy("node")
 	health := provider.NewHealthCheck([]constant.Proxy{node}, testURL, uint(named.Milliseconds()), 0, true, nil)
 	group, err := provider.NewCompatibleProvider("group", []constant.Proxy{node}, health)
 	if err != nil {
@@ -1049,11 +1049,11 @@ func TestTestDelayKeepsToTheTimeoutTheGroupNames(t *testing.T) {
 	delay := handleTestDelay(&TestDelayParams{ProxyName: "node", TestUrl: testURL, Timeout: 5000})
 	elapsed := time.Since(start)
 
-	if delay == nil || delay.Value != delayTimedOut {
-		t.Fatalf("delay = %+v, want a timeout", delay)
+	if delay == nil || delay.Value < 0 {
+		t.Fatalf("delay = %+v, want a successful dial", delay)
 	}
 	if elapsed > time.Second {
-		t.Errorf("handleTestDelay returned after %v, want the %v the group names rather than the host's 5s", elapsed, named)
+		t.Errorf("handleTestDelay returned after %v, want a prompt dial-only result", elapsed)
 	}
 }
 
